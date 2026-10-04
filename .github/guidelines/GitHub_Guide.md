@@ -67,15 +67,43 @@ Never push directly to `main`. Never rewrite `main`'s history.
 
 `<type>/<issue-number>-<short-description>`
 
-| Type        | Use for                                  | Example                           |
-|-------------|------------------------------------------|-----------------------------------|
-| `feat/`     | New capability                           | `feat/12-sparse-matrix-ops`       |
-| `fix/`      | Bug fix                                  | `fix/31-cfl-timestep-overflow`    |
-| `perf/`     | Performance, no behaviour change         | `perf/18-openmp-flux-loop`        |
-| `refactor/` | Restructure, no behaviour change         | `refactor/22-split-linalg-module` |
-| `test/`     | Tests only                               | `test/25-matrix-ops-edge-cases`   |
-| `docs/`     | Documentation only                       | `docs/derivation-of-scheme`       |
-| `exp/`      | Numerical experiments (may never merge)  | `exp/novel-flux-limiter`          |
+- **type**: one of the types below
+- **issue-number**: the issue this branch works on (omit if there is none)
+- **short-description**: lowercase, words separated by hyphens, no spaces
+
+Example: `style/7-cg06-cg07-formatting` = a style change, for issue #7, about
+CG-06/CG-07 formatting.
+
+### Types
+
+The **same types** are used for branch names (`feat/…`) and commit messages
+(`feat(scope): …`), so a branch and its commits always match.
+
+| Type | Use it when you… | Changes behaviour? | Branch example | Commit example |
+|------|------------------|:---:|----------------|----------------|
+| `feat` | add a new capability (a solver, a matrix operation, a boundary condition) | ✅ | `feat/12-sparse-matrix-ops` | `feat(linalg): add CSR matrix-vector product` |
+| `fix` | correct a bug (wrong result, crash, divergence) | ✅ | `fix/31-cfl-timestep-overflow` | `fix(solver): clamp dt to CFL limit` |
+| `perf` | make code faster or use less memory, same results | ❌ | `perf/18-openmp-flux-loop` | `perf(numerics): parallelise flux loop with OpenMP` |
+| `refactor` | restructure code (rename, split files, simplify), same results | ❌ | `refactor/22-split-linalg-module` | `refactor(linalg): move Matrix into its own header` |
+| `style` | change formatting only: whitespace, line endings, clang-format | ❌ | `style/7-cg06-cg07-formatting` | `style: apply clang-format to codebase` |
+| `test` | add or fix tests, no change to the code under test | ❌ | `test/2-matrix-unit-tests` | `test(linalg): add edge cases for multiply` |
+| `docs` | change documentation only (README, guides, comments, derivations) | ❌ | `docs/4-goldenrule-book` | `docs(guidelines): add coding guidelines v1.0.0` |
+| `build` | change the build system or dependencies (CMake, compiler flags) | ❌ | `build/15-enable-openmp` | `build: add OpenMP to CMakeLists` |
+| `ci` | change CI workflows (`.github/workflows/`) | ❌ | `ci/16-add-clang-build` | `ci: add clang to build matrix` |
+| `chore` | do maintenance that fits nowhere else (`.gitignore`, scripts, conformance PRs) | ❌ | `chore/conform-v2.0.0` | `chore(guidelines): conform codebase to v2.0.0` |
+| `exp` | try a numerical idea that may never be merged | — | `exp/novel-flux-limiter` | *(anything; clean up before merging)* |
+
+**How to choose:**
+- Does the code now **do something new**? → `feat`
+- Did it do something **wrong** before? → `fix`
+- Same results, just **faster**? → `perf`
+- Same results, **reorganised**? → `refactor`
+- Same results, only **whitespace/formatting**? → `style`
+- Only **tests / docs / build / CI** touched? → `test` / `docs` / `build` / `ci`
+- None of the above? → `chore`
+
+If a change needs two types (e.g. a `feat` and a `refactor`), it is usually
+two PRs.
 
 `exp/` branches are for trying ideas on the algorithm. They can live as long as
 you want and be messy. If the idea works, open a clean `feat/` branch with the
@@ -95,7 +123,8 @@ We use **Conventional Commits**:
 Refs #12
 ```
 
-**Types:** `feat`, `fix`, `perf`, `refactor`, `test`, `docs`, `build`, `ci`, `chore`
+**Types:** the same as for branches, see [§2 Types](#types):
+`feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`
 **Scopes:** `linalg`, `solver`, `mesh`, `bc` (boundary conditions), `io`,
 `numerics`, `apps`, `build`, `tests`
 
