@@ -16,6 +16,7 @@ of the commands to follow them.
 4. [Pull Requests](#4-pull-requests)
 5. [Reviewing](#5-reviewing)
 6. [Code style](#6-code-style)
+   - [6.1 Adding a rule: the freeze procedure](#61-adding-a-rule-the-freeze-procedure)
 7. [Tests](#7-tests)
 8. [What never goes in the repo](#8-what-never-goes-in-the-repo)
 9. [Releases](#9-releases)
@@ -168,19 +169,144 @@ Closes #
 
 ## 6. Code style
 
-- **C++20**, formatted with **clang-format** (config in `.clang-format`).
-  Run `scripts/format.sh` before committing; CI rejects unformatted code.
-- Compile warning-free with `-Wall -Wextra -Wpedantic`.
-- Naming:
-  - `snake_case` → functions, variables
-  - `PascalCase` → types (classes, structs)
-  - `kConstant` → constants
-  - `member_` → private members
-- **Document units** of physical quantities at declaration:
-  `double dt;  // [s]`
-- No raw `new`/`delete` — use `std::vector`, `std::unique_ptr`.
-- Headers in `include/`, implementation in `src/`, executables in `apps/`,
-  tests in `tests/`. Every `src/foo.cpp` has a matching `include/foo.hpp`.
+The binding coding rules live in **[CODING_GUIDELINES.md](../CODING_GUIDELINES.md)**.
+That file is the single source of truth. In short:
+
+- Run `scripts/format.sh` before committing; CI rejects unformatted code.
+- Builds must have zero warnings.
+- In reviews, cite the rule ID: *"this breaks CG-28"*.
+
+### 6.1 Adding a rule: the freeze procedure
+
+Anyone can change the guidelines, **only through a Pull Request**. When a new
+rule is added, the whole codebase must be brought into line with it, and
+**nothing else is merged into `main` until that's done**.
+
+**Two paths:**
+
+| Situation | What to do |
+|---|---|
+| The code can be fixed **in the same PR** that adds the rule (rename, reformat, small refactor) | Do both in one PR. **No freeze needed.** ← preferred |
+| Fixing the code takes real work | Add the rule **and** a `.guidelines-freeze` file → merges are frozen until a second PR fixes the code |
+
+#### How the freeze is enforced
+
+`.github/workflows/guidelines-freeze.yml` acts as a **guard at the door of
+`main`**. On every Pull Request it asks one question:
+**"Is there a `.guidelines-freeze` file on `main`?"**
+
+- **No** → normal day. ✅ The PR may be merged.
+- **Yes** → a new rule was added and the code doesn't follow it yet:
+  - PR title starts with `chore(guidelines): conform` → this is the PR that
+    fixes the code. ✅ It goes through.
+  - Any other PR → ❌ blocked: *"Merges are frozen until the codebase conforms."*
+
+The guard always looks at **`main`** (the branch you merge *into*), never at
+your PR branch (the branch with your changes). The freeze is a state of the
+shared code, so every PR gets the same answer.
+
+> The guard does not read the code or check any rule. It only looks for one file.
+> For the ❌ to actually grey out the Merge button, `guidelines-freeze` must be a
+> **required status check** in the `main` ruleset (see §10).
+
+#### Worked example
+
+**Starting point.** `main` contains `matrix_ops.cpp`. Its `multiply()` does
+**not** check that the two matrices can be multiplied. A 3×2 times a 4×5
+silently reads garbage. Meanwhile, your friend is working on
+`feat/sparse-solver`.
+
+**Step 1 — Propose the rule (and start the freeze).**
+Add to `CODING_GUIDELINES.md`:
+
+> **CG-51** — Matrix functions **MUST** check dimensions and throw
+> `std::invalid_argument` if they don't match.
+
+Fixing all matrix code is real work, so this PR also creates the freeze file:
+
+```bash
+git switch main && git pull
+git switch -c docs/add-rule-CG-51
+# edit CODING_GUIDELINES.md: add CG-51, bump version to 2.0.0, add changelog line
+printf 'version: 2.0.0\nrules: CG-51\n' > .guidelines-freeze
+git add -A
+git commit -m "docs(guidelines): add CG-51 dimension checks"
+git push -u origin docs/add-rule-CG-51
+gh pr create --fill
+```
+
+Guard: no freeze file on `main` yet → ✅. Both of you approve → merged.
+**`main` is now frozen.**
+
+**Step 2 — Other PRs are blocked.**
+Your friend opens a PR from `feat/sparse-solver`.
+Guard: freeze file on `main`, title isn't *conform* → ❌
+
+```
+❌ guidelines-freeze — Merges are frozen until the codebase conforms
+   to the new guidelines. See CODING_GUIDELINES.md §B.
+```
+
+Nothing is lost. The branch simply waits.
+
+**Step 3 — Fix the codebase and lift the freeze.**
+One of you reviews **all** the code against CG-51 and fixes it:
+
+```bash
+git switch main && git pull
+git switch -c chore/conform-v2.0.0
+```
+
+```cpp
+// src/matrix_ops.cpp — now follows CG-51
+Matrix multiply(const Matrix& a, const Matrix& b) {
+    if (a.cols != b.rows) {
+        throw std::invalid_argument("multiply: a.cols != b.rows");
+    }
+    // ...
+}
+```
+
+```bash
+git rm .guidelines-freeze                  # lift the freeze
+git add -A
+git commit -m "chore(guidelines): conform codebase to v2.0.0"
+git push -u origin chore/conform-v2.0.0
+gh pr create --title "chore(guidelines): conform codebase to v2.0.0" --fill
+```
+
+Guard: freeze file still on `main`, but the title says *conform* → ✅.
+The other person reviews it, using CG-51 as the checklist → merged.
+**`main` is no longer frozen.** Aim to get here within **48 h** of Step 1.
+
+**Step 4 — Everyone else catches up.**
+
+```bash
+git switch feat/sparse-solver
+git fetch origin
+git rebase origin/main
+# make any new matrix code follow CG-51 too
+git push --force-with-lease
+```
+
+Guard: no freeze file → ✅. The PR can be merged.
+
+**Summary:**
+
+```
+add rule + .guidelines-freeze  →  every PR blocked  →  fix code + delete .guidelines-freeze  →  everyone unblocked
+        (Step 1)                     (Step 2)                    (Step 3)                         (Step 4)
+```
+
+#### Limitations
+
+- **The exception is based on trust.** Anyone *could* title a PR "conform…"
+  to get past the guard. Don't. Review will catch it anyway.
+- **Results can go stale.** A PR that passed before the freeze keeps its old ✅
+  until it runs again. Enabling *"Require branches to be up to date before
+  merging"* (§10) forces a rebase, which re-runs the check.
+- **It only watches PRs.** Direct pushes to `main` are blocked by the ruleset,
+  not by this workflow.
 
 ---
 
@@ -240,7 +366,8 @@ One-time setup, done by whoever owns the repo, checked by the other.
 - [ ] Restrict deletions · Block force pushes
 - [ ] Require a pull request · **1** approval · dismiss stale approvals ·
       require conversation resolution
-- [ ] Require status checks to pass (add the CI jobs after the first run)
+- [ ] Require status checks to pass (add the CI jobs after the first run,
+      **including `guidelines-freeze`**) · require branches to be up to date
 - [ ] Require linear history
 
 > Rulesets on a **private** repo need a paid plan. Students get GitHub Pro free
@@ -553,6 +680,11 @@ git push --force-with-lease
 gh pr merge <n> --squash --delete-branch
 git switch main && git pull
 git branch -d feat/<n>-<name>
+
+# ── add a rule that needs a freeze (§6.1) ──
+printf 'version: X.Y.Z\nrules: CG-NN\n' > .guidelines-freeze   # in the rule PR
+git rm .guidelines-freeze                                      # in the "conform" PR
+gh pr create --title "chore(guidelines): conform codebase to vX.Y.Z" --fill
 
 # ── rescue ─────────────────────────────────
 git stash / git stash pop

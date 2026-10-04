@@ -11,3 +11,8 @@
 ## How to Compile
 
 Compiling `CMakeLists.txt` under construction in all directories
+
+## Contributing
+
+- [Coding guidelines (binding)](CODING_GUIDELINES.md)
+- [Git & GitHub guide](guidelines/GITHUB_GUIDE.md)
