@@ -123,10 +123,40 @@ We use **Conventional Commits**:
 Refs #12
 ```
 
-**Types:** the same as for branches, see [§2 Types](#types):
-`feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`
-**Scopes:** `linalg`, `solver`, `mesh`, `bc` (boundary conditions), `io`,
-`numerics`, `apps`, `build`, `tests`
+### Types
+The same as for branches, see [§2 Types](#types):
+`feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`, etc..
+
+### Scopes
+
+The scope says **which part of the project** a commit touches. Scopes are
+defined by this project. **To add or rename one, open a PR that edits this
+table.** Use only scopes listed here.
+
+| Scope | Covers |
+|-------|--------|
+| `linalg` | Matrices, vectors, sparse storage, linear solvers |
+| `mesh` | Grid generation, geometry, connectivity |
+| `solver` | Main time loop and the core algorithm |
+| `numerics` | Discretisation: fluxes, interpolation, gradients, limiters |
+| `bc` | Boundary conditions |
+| `physics` | Fluid models: viscosity, turbulence, equation of state |
+| `time` | Time integration, CFL / time-step control |
+| `io` | Input/config files, output (VTK, HDF5) |
+| `parallel` | OpenMP, MPI, GPU |
+| `apps` | Executables in `apps/` |
+| `tests` | Unit tests and test helpers |
+| `cases` | Validation cases and reference data |
+| `bench` | Speed tests and benchmarks |
+| `guidelines` | `CODING_GUIDELINES.md` and this guide |
+| `cmake` | `CMakeLists.txt` and build options |
+| `deps` | External libraries |
+
+Rules:
+- The scope is **optional**. Omit it when a change touches everything
+  (`style: apply clang-format`).
+- **One scope per commit.** Needing two usually means two commits.
+- Don't repeat the type: write `ci: …`, not `ci(ci): …`.
 
 ✅ Good
 

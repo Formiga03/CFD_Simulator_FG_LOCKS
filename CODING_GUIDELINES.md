@@ -1,6 +1,6 @@
 # Coding Guidelines — CFD Simulator
 
-**Version:** 1.0.0 · **Last updated:** 2026-10-04
+**Version:** 1.1.0 · **Last updated:** 2026-10-04
 
 This document defines the rules that **all code in this repository must follow**.
 It is binding: a Pull Request that breaks a rule is not merged.
@@ -124,8 +124,8 @@ Each rule has a permanent ID (e.g. `CG-12`) so it can be cited in reviews:
 
 | ID | Rule |
 |----|------|
-| CG-48 | Commit messages **MUST** follow Conventional Commits: `type(scope): imperative summary`. |
-| CG-49 | Branch names **MUST** follow `<type>/<issue>-<description>`. |
+| CG-48 | Commit messages **MUST** follow Conventional Commits: `type(scope): imperative summary`, using the types and scopes listed in `guidelines/GITHUB_GUIDE.md` §2–§3. |
+| CG-49 | Branch names **MUST** follow `<type>/<issue>-<description>` using the types and scopes listed in `guidelines/GITHUB_GUIDE.md` §2. |
 | CG-50 | Build output, simulation results, large data and secrets **MUST NOT** be committed. |
 
 ---
@@ -203,3 +203,4 @@ If the same exception keeps coming back, change the rule instead (§A).
 | Version | Date | Change |
 |---------|------|--------|
 | 1.0.0 | 2026-10-04 | Initial guidelines (CG-01 … CG-50). |
+| 1.1.0 | 2026-10-04 | Addition reference table to the naming systems required fopr the braches and commit messages (CG-48 and CG-49). |
