@@ -6,12 +6,12 @@ project(MatrixProject
     LANGUAGES CXX
 )
 
-# 1. Enforce modern C++
+# Enforce modern C++
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 2. Define your production library target
+# Define production library target
 # Since Matrix<T> is template-based, use an INTERFACE library
 add_library(matrix_lib INTERFACE)
 
@@ -21,10 +21,11 @@ target_include_directories(matrix_lib INTERFACE
     $<INSTALL_INTERFACE:include>
 )
 
-# 3. Handle testing conditionally
+# Handle testing conditionally
 # include(CTest) automatically provides the BUILD_TESTING option (ON by default)
 include(CTest)
+option(BUILD_BENCHMARKS "Build benchmark executables" ON)
 
-if(BUILD_TESTING)
+if(BUILD_TESTING OR BUILD_BENCHMARKS)
     add_subdirectory(tests)
 endif()
