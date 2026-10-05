@@ -1,4 +1,4 @@
-# Download Catch2 via FetchContent (isolated to tests only)
+# Fetch Catch2 once for all test categories
 include(FetchContent)
 FetchContent_Declare(
     Catch2
@@ -7,22 +7,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-# Standard Unit Test Runner
-add_executable(utest_matrix utest_matrix.cpp)
-
-target_link_libraries(utest_matrix PRIVATE
-    matrix_lib
-    Catch2::Catch2WithMain
-)
-
-# Speed Test Runner
-add_executable(stest_matrix stest_matrix.cpp)
-
-target_link_libraries(stest_matrix PRIVATE 
-    matrix_lib 
-    Catch2::Catch2WithMain
-)
-
-# Integrate with CTest test discovery
+# Catch module needed for catch_discover_tests
 include(Catch)
-catch_discover_tests(utest_matrix)
+
+# Conditionally delegate to subdirectories
+if(BUILD_TESTING)
+    add_subdirectory(unit)
+endif()
+
+if(BUILD_BENCHMARKS)
+    add_subdirectory(speed)
+endif()
