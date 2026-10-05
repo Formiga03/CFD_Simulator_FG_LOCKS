@@ -482,6 +482,7 @@ struct Matrix {
      * 
      * @param out [OUTPUT] Reusable matrix buffer to store the transposed result.
      */
+
     void transpose_into(Matrix<T>& out) const {
         out.resize(cols, rows); 
         
@@ -493,9 +494,9 @@ struct Matrix {
                 
                 int r_max = std::min(r + BLOCK_SIZE, rows);
                 int c_max = std::min(c + BLOCK_SIZE, cols);
-                
-                for (int rr = r; rr < r_max; ++rr) {
-                    for (int cc = c; cc < c_max; ++cc) {
+
+                for (int cc = c; cc < c_max; ++cc) {
+                    for (int rr = r; rr < r_max; ++rr) {
                         out(cc, rr) = (*this)(rr, cc);
                     }
                 }
