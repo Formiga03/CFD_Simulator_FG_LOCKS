@@ -17,7 +17,7 @@ Compiling `CMakeLists.txt` under construction in all directories
 - [Coding guidelines (binding)](CODING_GUIDELINES.md)
 - [Git & GitHub guide](guidelines/GITHUB_GUIDE.md)
 
-## How to Test
+## How to Unit Test
 
 - Build with 
  + `cmake -B build -DCMAKE_BUILD_TYPE=Debug`
@@ -37,3 +37,12 @@ Compiling `CMakeLists.txt` under construction in all directories
 
 - For Verbose Output
  + `./build/tests/test_matrix -s`
+
+## How to Speed/Benchmark Test
+
+- Build with
+ + `cmake -B build -DCMAKE_BUILD_TYPE=Release`
+ + `cmake --build build -j`
+
+- Run benchmark with
+ + `./build/tests/stest_name`
