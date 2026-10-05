@@ -1,9 +1,10 @@
+#include "matrix.hpp"
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+
 #include <complex>
 #include <vector>
-
-#include "matrix.hpp"
 
 using Catch::Matchers::WithinAbs;
 using Catch::Matchers::WithinRel;
@@ -14,6 +15,7 @@ Matrix<T> make_incremental_matrix(int rows, int cols)
 {
 
 	Matrix<T> m(rows, cols);
+<<<<<<< HEAD
 	T val = T{1};
 
 	for (int r = 0; r < rows; ++r)
@@ -23,10 +25,22 @@ Matrix<T> make_incremental_matrix(int rows, int cols)
 			m(r,c) = val;
 			val += T{1};
 		}
+=======
+
+	for (int r = 0; r < rows; ++r)
+
+	{
+		for(int c = 0; c < cols; ++c)
+		{
+      			m(r,c) = val;
+			val += T{1};
+    		}
+>>>>>>> 64d65f335814b910b14cdfcac6cbc971273014ac
 	}
 	return m;
 }
 
+<<<<<<< HEAD
 TEST_CASE("Matrix Lifecycle", "[matrix][lifecycle]")
 {
 	SECTION("Default constructor 0x0 empty matrix")
@@ -84,3 +98,6 @@ TEST_CASE("Matrix Lifecycle", "[matrix][lifecycle]")
 		CHECK(m.data.empty());
 	}
 }
+=======
+
+>>>>>>> 64d65f335814b910b14cdfcac6cbc971273014ac
