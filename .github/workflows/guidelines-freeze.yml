@@ -1,0 +1,39 @@
+# Blocks every PR while a coding-guidelines conformance freeze is active.
+# Save as .github/workflows/guidelines-freeze.yml and add the
+# "guidelines-freeze" job as a required status check on main.
+name: guidelines-freeze
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  guidelines-freeze:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Block PRs during a conformance freeze
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [ ! -f .guidelines-freeze ]; then
+            echo "No freeze active."
+            exit 0
+          fi
+          echo "A coding-guidelines conformance freeze is active:"
+          cat .guidelines-freeze
+          case "$PR_TITLE" in
+            "chore(guidelines): conform"*)
+              echo "This is the conformance PR. Allowed."
+              exit 0 ;;
+            *)
+              echo "::error::Merges are frozen until the codebase conforms to the new guidelines. See CODING_GUIDELINES.md §B."
+              exit 1 ;;
+          esac
