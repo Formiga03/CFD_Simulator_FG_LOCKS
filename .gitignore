@@ -1,0 +1,28 @@
+# Prerequisites / Compiled Binaries
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# CMake build directories (CLI and IDE variants)
+build/
+build-*/
+cmake-build-*/
+out/
+
+# CMake cache and temporary artifacts (in case an in-source build was run)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+Testing/
+
+# IDE and Editor configurations
+.vscode/
+.idea/
+*.swp
+*~
